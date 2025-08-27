@@ -20,7 +20,7 @@ bot = Bot(token=TOKEN)
 
 def check_bls():
     # هنا ضع رابط موقع المواعيد الحقيقي
-    url = "https://www.bls-example.com/appointments"
+    url = "https://algeria.blsspainvisa.com/algiers/"
     try:
         response = requests.get(url)
         data = response.json()
