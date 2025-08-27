@@ -2,5 +2,9 @@ services:
   - type: worker
     name: bls-bot
     env: python
-    buildCommand: "pip3 install -r requirements.txt"
-    startCommand: "python3 main.py"
+    plan: free
+    buildCommand: "pip install --no-cache-dir -r requirements.txt"
+    startCommand: "python main.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.7
