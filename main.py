@@ -1,57 +1,58 @@
-from flask import Flask
+import os
 import threading
 import time
-import os
 import requests
+from flask import Flask
 from telegram import Bot, Update
-from telegram.ext import Updater, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, CallbackContext
 
-# --- إعداد Flask ---
+# ---- Telegram Bot Setup ----
+TOKEN = os.getenv("BOT_TOKEN")  # ضع التوكن في Secrets
+CHAT_ID = os.getenv("CHAT_ID")  # ضع الشات آيدي في Secrets
+
+bot = Bot(TOKEN)
+
+# ---- Flask Web Server ----
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Bot is alive ✅"
+    return "Bot is running ✅"
 
-# --- إعداد Telegram Bot ---
-TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
-bot = Bot(token=TOKEN)
+# ---- Telegram Commands ----
+def start(update: Update, context: CallbackContext):
+    update.message.reply_text("اهلا! البوت يراقب المواعيد.")
 
+def ping(update: Update, context: CallbackContext):
+    update.message.reply_text("Replit يراقب ✅")
+
+# ---- BLS Checking Logic ----
 def check_bls():
-    # هنا ضع رابط موقع المواعيد الحقيقي
-    url = "https://algeria.blsspainvisa.com/algiers/"
-    try:
-        response = requests.get(url)
-        data = response.json()
-        if data.get("available_slots"):
-            return True
-    except Exception as e:
-        print("خطأ في جلب المواعيد:", e)
-    return False
-
-# الرد على رسالة "هل انت تعمل"
-def handle_message(update, context):
-    if "هل انت تعمل" in update.message.text:
-        update.message.reply_text("Replit يراقب ✅")
-
-# --- تشغيل Telegram Bot ---
-updater = Updater(token=TOKEN, use_context=True)
-dispatcher = updater.dispatcher
-dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
-updater.start_polling()
-print("🚀 Bot started on Replit!")
-
-# --- حلقة التحقق من المواعيد ---
-def monitor_bls():
     while True:
-        if check_bls():
-            bot.send_message(chat_id=CHAT_ID, text="📢 تم فتح موعد في BLS الآن!")
+        try:
+            url = "https://algeria.blsspainvisa.com/algiers/"  # ضع هنا الرابط اللي نراقبه
+            r = requests.get(url, timeout=10)
+
+            if "No appointment" not in r.text:  
+                bot.send_message(chat_id=CHAT_ID, text="🚨 مواعيد متوفرة الآن!")
+        except Exception as e:
+            print("Error checking site:", e)
+
         time.sleep(60)  # كل دقيقة
 
-# تشغيل المراقبة في Thread منفصل
-threading.Thread(target=monitor_bls).start()
+# ---- Run Bot ----
+def run_bot():
+    updater = Updater(TOKEN, use_context=True)
+    dp = updater.dispatcher
 
-# تشغيل Flask server
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("ping", ping))
+
+    updater.start_polling()
+    updater.idle()
+
+# ---- Run Both Flask + Bot + Checker ----
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000)
+    threading.Thread(target=check_bls).start()
+    threading.Thread(target=run_bot).start()
+    app.run(host="0.0.0.0", port=8080)
