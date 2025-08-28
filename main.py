@@ -7,8 +7,8 @@ from telegram import Bot, Update
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
 # ---- Telegram Bot Setup ----
-TOKEN = os.getenv("BOT_TOKEN")  # ضع التوكن في Secrets
-CHAT_ID = os.getenv("CHAT_ID")  # ضع الشات آيدي في Secrets
+TOKEN = os.getenv("BOT_TOKEN")  # ضع BOT_TOKEN في Secrets
+CHAT_ID = os.getenv("CHAT_ID")  # ضع CHAT_ID في Secrets
 
 bot = Bot(TOKEN)
 
@@ -17,26 +17,27 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Bot is running ✅"
+    return "✅ Bot & Server are running"
 
 # ---- Telegram Commands ----
 def start(update: Update, context: CallbackContext):
-    update.message.reply_text("اهلا! البوت يراقب المواعيد.")
+    update.message.reply_text("اهلا! انا اراقب مواعيد BLS لك.")
 
 def ping(update: Update, context: CallbackContext):
     update.message.reply_text("Replit يراقب ✅")
 
-# ---- BLS Checking Logic ----
+# ---- BLS Appointment Checking ----
 def check_bls():
     while True:
         try:
-            url = "https://algeria.blsspainvisa.com/algiers/"  # ضع هنا الرابط اللي نراقبه
+            url = "https://algeria.blsspainvisa.com/algiers/"  # ضع هنا صفحة المواعيد الصحيحة
             r = requests.get(url, timeout=10)
 
-            if "No appointment" not in r.text:  
-                bot.send_message(chat_id=CHAT_ID, text="🚨 مواعيد متوفرة الآن!")
+            # منطق التحقق (غير النص حسب ما يظهر عند عدم وجود مواعيد)
+            if "No appointment" not in r.text:
+                bot.send_message(chat_id=CHAT_ID, text="🚨 تم فتح المواعيد! أسرع واحجز ✅")
         except Exception as e:
-            print("Error checking site:", e)
+            print("❌ Error checking site:", e)
 
         time.sleep(60)  # كل دقيقة
 
