@@ -5,7 +5,7 @@ import requests
 from flask import Flask
 from telegram import Bot
 from telegram.ext import Updater, CommandHandler
-import imghdr_pure as imghdr
+
 
 
 # ========= إعداد المتغيرات =========
