@@ -71,7 +71,6 @@ def run_bot():
     dp = updater.dispatcher
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("ping", ping))
-    dp.add_handler(CommandHandler("status", status))
     updater.start_polling()
     updater.idle()
 
