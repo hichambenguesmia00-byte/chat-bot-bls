@@ -5,6 +5,8 @@ import requests
 from flask import Flask
 from telegram import Bot
 from telegram.ext import Updater, CommandHandler
+import imghdr_pure as imghdr
+
 
 # ========= إعداد المتغيرات =========
 TOKEN = os.getenv("BOT_TOKEN")  # ضع التوكن في Render env vars
