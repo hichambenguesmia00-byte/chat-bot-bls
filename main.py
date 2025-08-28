@@ -1,22 +1,13 @@
 import os
-from telegram import Bot
-import threading
-import time
-import requests
-from flask import Flask
 from telegram.ext import Updater, CommandHandler
+from flask import Flask
+import threading
 
 # ============= إعدادات البوت =============
-TOKEN = os.getenv("BOT_TOKEN")   # التوكن من المتغيرات
-CHAT_ID = int(os.getenv("CHAT_ID"))  # معرف الشات من المتغيرات
+TOKEN = os.getenv("BOT_TOKEN")   # التوكن من Render
+CHAT_ID = os.getenv("CHAT_ID")   # خليه نصياً للتجربة
 
-
-
-
-CHECK_URL = "https://algeria.blsspainvisa.com/algiers/"  # رابط الصفحة اللي تراقبها
-CHECK_INTERVAL = 120  # مدة التحقق بالثواني (120 = دقيقتين)
-
-# ============= Flask للإبقاء على السيرفر شغال =============
+# ============= Flask =============
 app = Flask(__name__)
 
 @app.route("/")
@@ -26,24 +17,12 @@ def home():
 def run_flask():
     app.run(host="0.0.0.0", port=10000)
 
-# ============= وظائف البوت =============
+# ============= أوامر البوت =============
 def start(update, context):
-    update.message.reply_text("🚀 البوت شغال! استخدمني لمراقبة المواعيد.")
+    update.message.reply_text("🚀 البوت شغال 100%!")
 
 def ping(update, context):
-    update.message.reply_text("Replit/Render يراقب ✅")
-
-# دالة التحقق من المواعيد
-def check_appointments(context):
-    try:
-        resp = requests.get(CHECK_URL, timeout=10)
-        text = resp.text
-
-        if "no appointments" not in text.lower():  
-            context.bot.send_message(chat_id=CHAT_ID, text="📢 تم فتح المواعيد! ادخل الموقع الآن ✅")
-        # إذا ما في مواعيد → ما يرسل شيء
-    except Exception as e:
-        print("❌ Error checking site:", e)
+    update.message.reply_text("✅ السيرفر حي ومراقب!")
 
 # ============= تشغيل البوت =============
 def run_bot():
@@ -53,17 +32,10 @@ def run_bot():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("ping", ping))
 
-    # جدولة التحقق كل CHECK_INTERVAL ثانية
-    job_queue = updater.job_queue
-    job_queue.run_repeating(check_appointments, interval=CHECK_INTERVAL, first=10)
-
     updater.start_polling()
     updater.idle()
 
 # ============= Main =============
 if __name__ == "__main__":
-    # Flask في thread فرعي
     threading.Thread(target=run_flask).start()
-
-    # بوت التلغرام في Main thread
     run_bot()
