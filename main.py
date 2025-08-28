@@ -7,8 +7,11 @@ from flask import Flask
 from telegram.ext import Updater, CommandHandler
 
 # ============= إعدادات البوت =============
-TOKEN = "ضع_توكن_البوت_هنا"
-CHAT_ID = 123456789   # ضع هنا Chat ID الخاص بك
+TOKEN = os.getenv("BOT_TOKEN")   # التوكن من المتغيرات
+CHAT_ID = int(os.getenv("CHAT_ID"))  # معرف الشات من المتغيرات
+
+
+
 
 CHECK_URL = "https://algeria.blsspainvisa.com/algiers/"  # رابط الصفحة اللي تراقبها
 CHECK_INTERVAL = 120  # مدة التحقق بالثواني (120 = دقيقتين)
